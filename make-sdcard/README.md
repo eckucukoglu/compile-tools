@@ -10,8 +10,8 @@ See comments to edit.
 
 # Options:
 
---device *device*     SD block device node (e.g /dev/mmcblk0)
---pes *version*      Which pandaboard es version wanted
+- --device *device*     SD block device node (e.g /dev/mmcblk0)
+- --pes *version*      Which pandaboard es version wanted
 
 Example:
 
