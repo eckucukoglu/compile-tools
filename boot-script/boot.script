@@ -1,0 +1,4 @@
+fatload mmc 0:1 0x80000000 uImage
+fatload mmc 0:1 0x82000000 omap4-panda-es.dtb
+setenv bootargs root=/dev/mmcblk0p2 rootwait console=ttyO2,115200 selinux=1
+bootm 0x80000000 - 0x82000000
