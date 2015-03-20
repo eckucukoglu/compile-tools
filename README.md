@@ -1,5 +1,3 @@
-# linux-tools
-
 Some basic tools I used, while developing, compiling and testing Linux related works.
 List is here:
 
@@ -35,3 +33,8 @@ For a given priority, allocate heap & stack area, then do matrix multiplication 
 # swave-pandaboard
 
 Generate square wave on Pandaboard ES gpios'.
+
+# toolchain-switcher
+
+Thomas Petazzoni's shell code to switch various toolchains from shell easily.
+I made a few changes on it. Reference: http://free-electrons.com/blog/switching-toolchains/

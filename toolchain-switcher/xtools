@@ -1,0 +1,59 @@
+# Set your main toolchain directory below:
+export XTOOLSDIR=/home/ecank/1511/toolchain
+
+xtoolsadd() {
+    TOOLCHAINDIR=$XTOOLSDIR/$1/bin
+    if [ ! -d $TOOLCHAINDIR ] ; then
+        echo "Directory $XTOOLSDIR doesn't exist"
+    else
+        case "$PATH" in
+            *"$XTOOLSDIR"*)
+                ;;
+            *)
+                export PATH=$TOOLCHAINDIR:$PATH
+        esac
+        export CC=$1-gcc
+        export CROSS_COMPILE=$1-
+	    export ARCH=arm
+	    export CXX=$1-g++
+	    export STAGING_LIBDIR=$XTOOLSDIR/$1/$1/lib
+    fi
+}
+
+xtoolsdel() {
+    TOOLCHAINDIR=$XTOOLSDIR/$1/bin
+    NEWPATH=
+    found=0
+    for i in $(echo $PATH | tr ":" "\n") ; do
+        if [ $i == $TOOLCHAINDIR ] ; then
+            found=1
+        else
+            NEWPATH=$NEWPATH:$i
+        fi
+    done
+    if [ $found == 0 ] ; then
+        echo "$1 is not in your PATH"
+    else
+        export PATH=$NEWPATH
+    fi
+    unset CC
+    unset CROSS_COMPILE
+    unset ARCH
+    unset CXX
+    unset STAGING_LIBDIR
+}
+
+_xtoolsadd() {
+    cur=${COMP_WORDS[COMP_CWORD]}
+    LIST=$(ls -1 $XTOOLSDIR | tr "\n" " ")
+    COMPREPLY=( $( compgen -W "$LIST" -- $cur))
+}
+
+_xtoolsdel() {
+    cur=${COMP_WORDS[COMP_CWORD]}
+    LIST=$(echo $PATH | tr ":" "\n" | grep "^$XTOOLSDIR" | sed "s%$XTOOLSDIR/\([^/]*\)/bin%\1%")
+    COMPREPLY=( $( compgen -W "$LIST" -- $cur))
+}
+
+complete -F _xtoolsadd xtoolsadd
+complete -F _xtoolsdel xtoolsdel
