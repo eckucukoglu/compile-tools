@@ -1,6 +1,6 @@
 #! /bin/sh
 
-VERSION="[MMIS mksdcard v0.2]"
+VERSION="[make-sdcard v0.3]"
 
 execute () {
     $* >/dev/null
@@ -55,8 +55,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-
-
 # Open help, if no device or pes selected.
 test -z $device || test -z $pes && usage $0
 
@@ -80,20 +78,23 @@ file_dtb=${dir_main}omap4-panda-es.dtb
 # Rootfs 
 file_rootfs=${dir_main}rootfs-extended.ext2
 
-for i in `ls -1 ${device}* `; do
- echo ">> Unmounting device '$i'"
-# execute "umount $i 2>/dev/null"
+# Partition names
+firstPartitionName=BOOT
+secondPartitionName=ROOTFS
+
+for i in `ls -1 ${device}* | grep -E ${device}.+`; do
+ echo ">> Unmounting '$i'"
+ umount $i 2>/dev/null
 done
 
 execute "dd if=/dev/zero of=$device bs=1024 count=1024"
 
-# note that: for Samsung SDCARD size=7964983296 and cylinder=968
 echo ">> Calculating size and number of cylinders"
 total_size=`fdisk -l $device | grep Disk | awk '{print $5}'`
 total_cyln=`echo $total_size/255/63/512 | bc`
 echo ">> Size: $total_size, #cylinder: $total_cyln"
 
-# for boot partition, number of cylinder:
+# For boot partition, number of cylinder:
 cylnSizeOfBoot=10
 
 # Change partition tables, first for boot, second for rootfs.
@@ -118,12 +119,15 @@ execute "mkdir -p ${dir_sdk}"
 
 # Format boot partition as FAT.
 echo ">> Formating ${device}p1"
-execute "mkfs.vfat -F 32 -n "boot" ${device}p1"
+execute "mkfs.vfat -F 32 -n ${firstPartitionName} ${device}p1"
 
-# Copy the boot files.
-echo ">> Copying boot images  on ${device}p1"
+# Mount boot partition.
+echo ">> Mounting ${device}p1"
 execute "mkdir -v -p ${dir_tmp}"
 execute "mount ${device}p1 ${dir_tmp}"
+
+# Copy the boot files.
+echo ">> Copying on ${device}p1"
 execute "cp ${file_bootscript} ${dir_tmp}/"
 execute "cp ${file_mlo} ${dir_tmp}/"
 execute "cp ${file_bootloader} ${dir_tmp}/"
@@ -131,22 +135,32 @@ execute "cp ${file_kernel} ${dir_tmp}/"
 execute "cp ${file_dtb} ${dir_tmp}/"
 
 sync
-echo ">> unmounting ${device}p1"
+echo ">> Unmounting ${device}p1"
 execute "umount ${dir_tmp}"
 
-# Format second partition as EXT3.
+# Format second partition as ext4.
 echo ">> Formating ${device}p2"
-execute "mkfs.ext3 -j -L "rootfs" ${device}p2"
+execute "mkfs.ext4 -L ${secondPartitionName} ${device}p2"
 
-# Copy the rootfs to second partition.
+# Mount second partition.
+echo ">> Mounting ${device}p2"
 execute "mkdir -v -p ${dir_tmp}"
 execute "mount ${device}p2 ${dir_tmp}"
-echo ">> Copying root filesystem on ${device}p2"
-execute "dd if=${file_rootfs} of=${device}p2"
+
+# Mount rootfs to local area.
+echo ">> Mounting ${file_rootfs}"
+execute "mkdir -v -p ${dir_tmp}1"
+execute "mount ${file_rootfs} ${dir_tmp}1"
+
+# Copy the rootfs to second partition.
+echo ">> Copying on ${device}p2"
+execute "cp -r ${dir_tmp}1/* ${dir_tmp}/"
 
 sync
-echo ">> unmounting ${device}p2"
+echo ">> Unmounting ${device}p2"
 execute "umount ${dir_tmp}"
+echo ">> Unmounting ${file_rootfs}"
+execute "umount ${dir_tmp}1"
 
 echo ">> Success."
 

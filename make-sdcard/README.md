@@ -10,4 +10,7 @@ See comments to edit.
 
 # Version history:
 
-
+v0.3
+- Instead of dd, first mount rootfs then copy the content.
+- Partition names capitalized.
+- Format second partiton as ext4.
