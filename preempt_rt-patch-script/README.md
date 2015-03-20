@@ -13,7 +13,7 @@ Compilation:
 ./make
 
 Usage:
-./rt_patch_script [OPTION]
+./rt_patch_script *OPTION*
 
 Options:
 -p: Do patches without logging

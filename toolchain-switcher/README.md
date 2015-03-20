@@ -12,5 +12,5 @@ PATH, CC, CROSS_COMPILE, ARCH, CXX, STAGING_LIBDIR
 Usage:
 Append content of xtools to your ~/.bashrc.
 
-xtoolsadd <toolchain> 
-xtoolsdel <toolchain>
+xtoolsadd *toolchain* 
+xtoolsdel *toolchain*

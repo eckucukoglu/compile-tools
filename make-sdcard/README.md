@@ -4,7 +4,16 @@ This script creates partitions on disk and copies boot images and rootfs.
 User has to set copied files directory in script.
 See comments to edit.
 
-# Example usage:
+# Usage:
+
+./mksdcard *OPTION*
+
+# Options:
+
+--device *device*     SD block device node (e.g /dev/mmcblk0)
+--pes *version*      Which pandaboard es version wanted
+
+Example:
 
 ./mksdcard --device /dev/mmcblk0 --pes 5
 
